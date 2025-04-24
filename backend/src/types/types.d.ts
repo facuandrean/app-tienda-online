@@ -9,10 +9,13 @@ export interface Product {
     featured: boolean;
     active: boolean;
 }
-  
+
+
+export type ProductWithoutId = Omit<Product, 'product_id'>;
 
 export interface Category {
     category_id: string;
     name: string;
     description: string;
 }
+

@@ -2,32 +2,71 @@ import { db } from "../database/database";
 import { products } from "../database/db/productsScheme";
 import { v4 as uuid } from "uuid";
 
-import type { Product } from "../types/types";
+import type { Product, ProductWithoutId } from "../types/types";
 import { eq } from "drizzle-orm";
+import { AppError } from "../errors";
 
 
 const getAllProducts = async (): Promise<Product[]> => {
-    const allProducts = await db.select().from(products).all();
+    try {
 
-    return allProducts;
+        const allProducts = await db.select().from(products).all();
+    
+        return allProducts;
+
+    } catch (error) {
+        throw new AppError("Error getting all products!", 404);
+    }
 }
 
 const getProductById = async (product_id: string): Promise<Product | undefined> => {
-    const product = await db.select().from(products).where(eq(products.product_id, product_id));
+    try {
 
-    return product.length > 0 ? product[0] : undefined;
+        const product = await db.select().from(products).where(eq(products.product_id, product_id));
+
+        return product.length > 0 ? product[0] : undefined;
+
+    } catch (error) {
+        throw new AppError(`Error getting product by id ${product_id}`, 404);
+    }
 }
 
-const postProduct = async () => {
-    return;
+const postProduct = async (dataProduct: ProductWithoutId): Promise<Product> => {
+    const newProduct = {
+        product_id: uuid(),
+        ...dataProduct
+    }
+
+    try {
+        await db.insert(products).values(newProduct);
+        return newProduct;
+    } catch (error) {
+        throw new AppError("Error creating product!", 400);
+    }
 }
 
-const putProduct = async () => {
-    return;
+const putProduct = async (dataProduct: ProductWithoutId, productId: string): Promise<Product> => {
+    try {
+        
+        const product = await db.update(products).set(dataProduct).where(eq(products.product_id, productId)).returning().get();
+
+        return product;
+
+    } catch (error) {
+        throw new AppError("Error updating product!", 400);
+    }
 }
 
-const deleteProduct = async () => {
-    return;
+const deleteProduct = async (productId: string): Promise<void> => {
+    try {
+        const response = await db.delete(products).where(eq(products.product_id, productId)).returning().get();
+
+        if (!response) {
+            throw new AppError("Product not found!", 404);
+        }
+    } catch (error) {
+        throw new AppError("Error deleting product!", 400);
+    }
 }
 
 export const productService = {
