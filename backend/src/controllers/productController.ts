@@ -1,15 +1,43 @@
 import type { Request, Response } from "express";
 import { productService } from "../services/productService";
 
-const getAllProducts = async (_req: Request, res: Response) => {
-    const allProducts = await productService.getAllProducts();
+import type { Product } from "../types/types";
 
-    res.status(200).json({ data: allProducts, message: "All products" });
+const getAllProducts = async (_req: Request, res: Response): Promise<void> => {
+    try {
+        const allProducts: Product[] = await productService.getAllProducts();
+
+        res.status(200).json({ response: allProducts });
+        return;
+    } catch (error) {
+        res.status(500).json({ response: "Internal server error" });
+        return;
+    }
 }
 
-const getProductById = async (_req: Request, res: Response) => {
-    const product = productService.getProductById();
-    res.end("Get product by id!");
+const getProductById = async (req: Request, res: Response): Promise<void> => {
+
+    try {
+        const { productId } =  req.params;
+
+        if (!productId) {
+            res.status(400).json({ response: "Product id is required!" });
+            return;
+        }
+    
+        const product: Product | undefined = await productService.getProductById(productId);
+
+        if (!product) {
+            res.status(404).json({ response: "Product not found!" });
+            return;
+        }
+        
+        res.status(200).json({ response: product});
+    } catch (error) {
+        res.status(500).json({ response: "Internal server error" });
+        return;
+    }
+
 }
 
 const postProduct = async (_req: Request, res: Response) => {
