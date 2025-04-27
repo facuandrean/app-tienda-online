@@ -22,9 +22,9 @@ const getAllProducts = async (): Promise<Product[]> => {
 const getProductById = async (product_id: string): Promise<Product | undefined> => {
     try {
 
-        const product = await db.select().from(products).where(eq(products.product_id, product_id));
+        const product = await db.select().from(products).where(eq(products.product_id, product_id)).get();
 
-        return product.length > 0 ? product[0] : undefined;
+        return product;
 
     } catch (error) {
         throw new AppError(`Error getting product by id ${product_id}`, 404);
@@ -38,8 +38,8 @@ const postProduct = async (dataProduct: ProductWithoutId): Promise<Product> => {
     }
 
     try {
-        await db.insert(products).values(newProduct);
-        return newProduct;
+        const product = await db.insert(products).values(newProduct).returning().get();
+        return product;
     } catch (error) {
         throw new AppError("Error creating product!", 400);
     }
@@ -59,11 +59,7 @@ const putProduct = async (dataProduct: ProductWithoutId, productId: string): Pro
 
 const deleteProduct = async (productId: string): Promise<void> => {
     try {
-        const response = await db.delete(products).where(eq(products.product_id, productId)).returning().get();
-
-        if (!response) {
-            throw new AppError("Product not found!", 404);
-        }
+        await db.delete(products).where(eq(products.product_id, productId));
     } catch (error) {
         throw new AppError("Error deleting product!", 400);
     }

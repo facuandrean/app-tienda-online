@@ -8,7 +8,10 @@ export const products = sqliteTable('products', {
   price: real('price').notNull(),
   stock: integer('stock').notNull(),
   picture: text('picture'),
-  category_id: text('category_id').references(() => categories.category_id).notNull(),
+  category_id: text('category_id').references(() => categories.category_id, {
+    onDelete: "set null",
+    onUpdate: "cascade"
+  }),
   featured: integer('featured', { mode: 'boolean' }).notNull(),
   active: integer('active', { mode: 'boolean' }).notNull()
 });

@@ -9,21 +9,17 @@ const getAllProducts = async (_req: Request, res: Response): Promise<void> => {
 
         const allProducts: Product[] = await productService.getAllProducts();
 
-        if (allProducts.length === 0) {
-            res.status(404).json({ response: "No products found." });
-            return;
-        }
-
-        res.status(200).json({ response: allProducts });
+        res.status(200).json({ status: 'Success', data: allProducts });
         return;
 
     } catch (error: unknown) {
 
         if (error instanceof AppError) {
-            res.status(error.statusCode).json({ response: error.message });
+            res.status(error.statusCode).json({ status: 'Failed', data: error.message });
             return;
         }
-        res.status(500).json({ response: "Internal server error" });
+
+        res.status(500).json({ status: 'Failed', data: "Internal server error" });
         return;
 
     }
@@ -35,27 +31,28 @@ const getProductById = async (req: Request, res: Response): Promise<void> => {
         const { productId } =  req.params;
 
         if (!productId) {
-            res.status(400).json({ response: "Product id is required!" });
+            res.status(400).json({ status: 'Failed', data: "Product id is required!" });
             return;
         }
     
         const product: Product | undefined = await productService.getProductById(productId);
 
-        if (!product) {
-            res.status(404).json({ response: "Product not found!" });
+        if (!product || product === undefined) {
+            res.status(404).json({ status: 'Failed', data: "Product not found!" });
             return;
         }
         
-        res.status(200).json({ response: product});
+        res.status(200).json({ status: 'Success', data: product});
+        return;
 
     } catch (error: unknown) {
         
         if (error instanceof AppError) {
-            res.status(error.statusCode).json({ response: error.message });
+            res.status(error.statusCode).json({ status: 'Failed', data: error.message });
             return;
         }
 
-        res.status(500).json({ response: "Internal server error" });
+        res.status(500).json({ status: 'Failed', data: "Internal server error" });
         return;
 
     }
@@ -67,7 +64,7 @@ const postProduct = async (req: Request, res: Response): Promise<void> => {
 
         if (!name || !description || price == null || stock == null || !category_id ||
             typeof featured !== "boolean" || typeof active !== "boolean") {
-            res.status(400).json({ response: "All fields are required!" });
+            res.status(400).json({ status: 'Failed', data: "All fields are required!" });
             return;
         }
 
@@ -82,9 +79,9 @@ const postProduct = async (req: Request, res: Response): Promise<void> => {
             active: Boolean(active)
         }
 
-        const product = await productService.postProduct(newProduct);
+        const product: Product = await productService.postProduct(newProduct);
 
-        res.status(201).json({ response: product });
+        res.status(201).json({ status: 'Success', data: product });
         return;
         
     } catch (error: unknown) {
@@ -105,14 +102,14 @@ const putProduct = async (req: Request, res: Response): Promise<void> => {
         const { productId } = req.params;
 
         if (!productId) {
-            res.status(400).json({ response: "Product id is required!" });
+            res.status(400).json({ status: 'Failed', data: "Product id is required!" });
             return;
         }
 
         const product: Product | undefined = await productService.getProductById(productId);
 
         if (!product) {
-            res.status(404).json({ response: "Product not found!" });
+            res.status(404).json({ status: 'Failed', data: "Product not found!" });
             return;
         }
 
@@ -124,7 +121,7 @@ const putProduct = async (req: Request, res: Response): Promise<void> => {
             return;
         }
 
-        const newProduct = {
+        const newDataProduct = {
             name,
             description,
             price: Number(price),
@@ -135,18 +132,18 @@ const putProduct = async (req: Request, res: Response): Promise<void> => {
             active: Boolean(active)
         }
 
-        const updatedProduct = await productService.putProduct(newProduct, productId);
+        const updatedProduct: Product = await productService.putProduct(newDataProduct, productId);
 
-        res.status(200).json({ response: updatedProduct });
+        res.status(200).json({ status: 'Success', data: updatedProduct });
         return;
 
     } catch (error: unknown) {
 
         if (error instanceof AppError) {
-            res.status(error.statusCode).json({ response: error.message });
+            res.status(error.statusCode).json({ status: 'Failed', data: error.message });
             return;
         }
-        res.status(500).json({ response: "Internal server error" });
+        res.status(500).json({ status: 'Failed', data: "Internal server error" });
         return;
 
     }
@@ -158,29 +155,29 @@ const deleteProduct = async (req: Request, res: Response): Promise<void> => {
         const { productId } = req.params;
 
         if (!productId) {
-            res.status(400).json({ response: "Product id is required!" });
+            res.status(400).json({ status: 'Failed', data: "Product id is required!" });
             return;
         }
 
         const product: Product | undefined = await productService.getProductById(productId);
 
         if (!product) {
-            res.status(404).json({ response: "Product not found!" });
+            res.status(404).json({ status: 'Failed', data: "Product not found!" });
             return;
         }
 
         await productService.deleteProduct(productId);
 
-        res.status(200).json({ response: "Product deleted successfully!" });
+        res.status(200).json({ status: 'Success', data: "Product deleted successfully!" });
         return;
 
     } catch (error: unknown) {
 
         if (error instanceof AppError) {
-            res.status(error.statusCode).json({ response: error.message });
+            res.status(error.statusCode).json({ status: 'Failed', data: error.message });
             return;
         }
-        res.status(500).json({ response: "Internal server error" });
+        res.status(500).json({ status: 'Failed', data: "Internal server error" });
         return;
 
     }

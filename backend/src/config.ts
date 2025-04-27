@@ -6,9 +6,9 @@ if (!tokenDB || !libsql) {
 }
 
 const config = {
-    tokenBD: process.env.TOKEN_DB,
-    libsql: process.env.URL_DB,
-    port: process.env.PORT || 3000,
+  tokenBD: process.env.TOKEN_DB,
+  libsql: process.env.URL_DB,
+  port: process.env.PORT || 3000,
 }
 
 export default config;

@@ -5,7 +5,7 @@ export interface Product {
     price: number;
     stock: number;
     picture?: string | null;
-    category_id: string;
+    category_id: string | null;
     featured: boolean;
     active: boolean;
 }
@@ -13,9 +13,13 @@ export interface Product {
 
 export type ProductWithoutId = Omit<Product, 'product_id'>;
 
+
 export interface Category {
     category_id: string;
     name: string;
     description: string;
 }
+
+
+export type CategoryWithoutId = Omit<Category, 'category_id'>;
 
