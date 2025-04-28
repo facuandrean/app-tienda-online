@@ -3,6 +3,14 @@ import { AppError } from "../errors";
 import { categoryService } from "../services/categoryService";
 import type { Category } from "../types/types";
 
+
+/**
+ * Retrieves all categories from the database.
+ * 
+ * @param _req - The HTTP request object (not used in this function).
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the list of categories.
+ */
 const getAllCategories = async (_req: Request, res: Response): Promise<void> => {
   try {
 
@@ -24,6 +32,14 @@ const getAllCategories = async (_req: Request, res: Response): Promise<void> => 
   }
 };
 
+
+/**
+ * Retrieves a specific category by its ID.
+ * 
+ * @param req - The HTTP request object containing the category ID in the params.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the category data, or an error message if not found.
+ */
 const getCategoryById = async (req: Request, res: Response): Promise<void> => {
   try {
 
@@ -57,10 +73,23 @@ const getCategoryById = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+
+/**
+ * Creates a new category in the database.
+ * 
+ * @param req - The HTTP request object containing the category data in the body.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the newly created category.
+ */
 const postCategory = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const { name, description } = req.body;
+    const dateUnformatted = new Date().toISOString();
+    const dateFormatted = new Date(dateUnformatted);
+    dateFormatted.setHours(dateFormatted.getHours() - 3);
+    const date = dateFormatted.toISOString();
+
+    const { name, description } = req.body as Category;
 
     if (!name || !description) {
       res.status(400).json({ status: 'Failed', data: "All fields are required!"});
@@ -69,7 +98,9 @@ const postCategory = async (req: Request, res: Response): Promise<void> => {
 
     const newCategory = {
       name,
-      description
+      description,
+      created_at: date,
+      updated_at: date
     };
 
     const category: Category = await categoryService.postCategory(newCategory);
@@ -90,9 +121,22 @@ const postCategory = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+
+/**
+ * Updates an existing category in the database.
+ * 
+ * @param req - The HTTP request object containing the category ID in the params and updated data in the body.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the updated category, or an error message if not found.
+ */
 const putCategory = async (req: Request, res: Response): Promise<void> => {
   try {
     
+    const dateUnformatted = new Date().toISOString();
+    const dateFormatted = new Date(dateUnformatted);
+    dateFormatted.setHours(dateFormatted.getHours() - 3);
+    const date = dateFormatted.toISOString();
+
     const { categoryId } = req.params;
 
     if (!categoryId) {
@@ -107,7 +151,7 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
       return;
     };
 
-    const { name, description } = req.body;
+    const { name, description } = req.body as Category;
 
     if (!name || !description) {
       res.status(400).json({ status: 'Failed', data: 'All fields are required!'});
@@ -116,7 +160,8 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
 
     const newDataCategory = {
       name,
-      description
+      description,
+      updated_at: date
     };
 
     const updatedCategory: Category = await categoryService.putCategory(newDataCategory, categoryId);
@@ -137,6 +182,13 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
   }
 };
 
+/**
+ * Deletes a category from the database.
+ * 
+ * @param req - The HTTP request object containing the category ID in the params.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and a success message, or an error message if not found.
+ */
 const deleteCategory = async (req: Request, res: Response): Promise<void> => {
   try {
     
