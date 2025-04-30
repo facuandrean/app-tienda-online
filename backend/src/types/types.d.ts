@@ -32,3 +32,19 @@ export type CategoryWithoutId = Omit<Category, 'category_id'>;
 
 
 export type CategoryForUpdate = Omit<Category, 'category_id', 'created_at'>;
+
+
+export interface Customer {
+    customer_id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+    city: string;
+    country: string;
+    neighborhood: string;
+    created_at: string;
+}
+
+
+export type CustomerWithoutId = Omit<Customer, 'customer_id'>;
