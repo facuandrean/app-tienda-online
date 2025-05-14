@@ -37,9 +37,9 @@ const getCategoryById = async (categoryId: string): Promise<Category | undefined
   try {
 
     const category = await db.select().from(categories).where(eq(categories.category_id, categoryId)).get();
-    
+
     return category;
-    
+
   } catch (error) {
     throw new AppError(`Error getting category by id ${categoryId}`, 404);
   }
@@ -101,7 +101,7 @@ const deleteCategory = async (categoryId: string): Promise<void> => {
     const nulleable = await db.update(products).set({ category_id: null }).where(eq(products.category_id, categoryId));
 
     if (nulleable) {
-      await db.delete(categories).where(eq(categories.category_id, categoryId));    
+      await db.delete(categories).where(eq(categories.category_id, categoryId));
     } else {
       throw new AppError('Error updating foreign key', 400);
     }

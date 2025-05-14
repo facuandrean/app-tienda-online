@@ -1,15 +1,15 @@
 export interface Product {
-    product_id: string;
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-    picture?: string | null;
-    category_id: string | null;
-    featured: boolean;
-    active: boolean;
-    created_at: string,
-    updated_at: string
+  product_id: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  picture?: string | null;
+  category_id: string | null;
+  featured: boolean;
+  active: boolean;
+  created_at: string,
+  updated_at: string
 }
 
 
@@ -20,11 +20,11 @@ export type ProductForUpdate = Omit<Product, 'product_id', 'created_at'>;
 
 
 export interface Category {
-    category_id: string;
-    name: string;
-    description: string;
-    created_at: string,
-    updated_at: string
+  category_id: string;
+  name: string;
+  description: string;
+  created_at: string,
+  updated_at: string
 }
 
 
@@ -35,15 +35,15 @@ export type CategoryForUpdate = Omit<Category, 'category_id', 'created_at'>;
 
 
 export interface Customer {
-    customer_id: string;
-    name: string;
-    email: string;
-    phone: string;
-    address: string;
-    city: string;
-    country: string;
-    neighborhood: string;
-    created_at: string;
+  customer_id: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  country: string;
+  neighborhood: string;
+  created_at: string;
 }
 
 

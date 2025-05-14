@@ -92,7 +92,7 @@ const postCategory = async (req: Request, res: Response): Promise<void> => {
     const { name, description } = req.body as Category;
 
     if (!name || !description) {
-      res.status(400).json({ status: 'Failed', data: "All fields are required!"});
+      res.status(400).json({ status: 'Failed', data: "All fields are required!" });
       return;
     }
 
@@ -131,7 +131,7 @@ const postCategory = async (req: Request, res: Response): Promise<void> => {
  */
 const putCategory = async (req: Request, res: Response): Promise<void> => {
   try {
-    
+
     const dateUnformatted = new Date().toISOString();
     const dateFormatted = new Date(dateUnformatted);
     dateFormatted.setHours(dateFormatted.getHours() - 3);
@@ -140,21 +140,21 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
     const { categoryId } = req.params;
 
     if (!categoryId) {
-      res.status(400).json({ status: 'Failed', data: 'Category id is required!'});
+      res.status(400).json({ status: 'Failed', data: 'Category id is required!' });
       return;
     };
 
     const category: Category | undefined = await categoryService.getCategoryById(categoryId);
 
     if (!category || category === undefined) {
-      res.status(404).json({ status: 'Failed', data: 'Category not found!'});
+      res.status(404).json({ status: 'Failed', data: 'Category not found!' });
       return;
     };
 
     const { name, description } = req.body as Category;
 
     if (!name || !description) {
-      res.status(400).json({ status: 'Failed', data: 'All fields are required!'});
+      res.status(400).json({ status: 'Failed', data: 'All fields are required!' });
       return;
     };
 
@@ -170,7 +170,7 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
     return;
 
   } catch (error) {
-    
+
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ status: 'Failed', data: error.message });
       return;
@@ -191,24 +191,24 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
  */
 const deleteCategory = async (req: Request, res: Response): Promise<void> => {
   try {
-    
+
     const { categoryId } = req.params;
-    
+
     if (!categoryId) {
-      res.status(400).json({ status: 'Failed', data: 'Category id is required!'});
+      res.status(400).json({ status: 'Failed', data: 'Category id is required!' });
       return;
     }
 
     const category: Category | undefined = await categoryService.getCategoryById(categoryId);
 
     if (!category || category === undefined) {
-      res.status(404).json({ status: 'Failed', data: 'Category not found!'});
+      res.status(404).json({ status: 'Failed', data: 'Category not found!' });
       return;
     }
 
     await categoryService.deleteCategory(categoryId);
 
-    res.status(201).json({ status: 'Success', data: 'Category successfully deleted'});
+    res.status(201).json({ status: 'Success', data: 'Category successfully deleted' });
     return;
 
   } catch (error) {

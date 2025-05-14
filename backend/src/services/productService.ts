@@ -13,15 +13,15 @@ import { AppError } from "../errors";
  * @throws {AppError} Throws an error if there is an issue retrieving the products.
  */
 const getAllProducts = async (): Promise<Product[]> => {
-    try {
+  try {
 
-        const allProducts = await db.select().from(products).all();
-    
-        return allProducts;
+    const allProducts = await db.select().from(products).all();
 
-    } catch (error) {
-        throw new AppError("Error getting all products!", 404);
-    }
+    return allProducts;
+
+  } catch (error) {
+    throw new AppError("Error getting all products!", 404);
+  }
 }
 
 
@@ -32,15 +32,15 @@ const getAllProducts = async (): Promise<Product[]> => {
  * @throws {AppError} Throws an error if there is an issue retrieving the product.
  */
 const getProductById = async (product_id: string): Promise<Product | undefined> => {
-    try {
+  try {
 
-        const product = await db.select().from(products).where(eq(products.product_id, product_id)).get();
+    const product = await db.select().from(products).where(eq(products.product_id, product_id)).get();
 
-        return product;
+    return product;
 
-    } catch (error) {
-        throw new AppError(`Error getting product by id ${product_id}`, 404);
-    }
+  } catch (error) {
+    throw new AppError(`Error getting product by id ${product_id}`, 404);
+  }
 }
 
 
@@ -51,17 +51,17 @@ const getProductById = async (product_id: string): Promise<Product | undefined> 
  * @throws {AppError} Throws an error if there is an issue creating the product.
  */
 const postProduct = async (dataProduct: ProductWithoutId): Promise<Product> => {
-    const newProduct = {
-        product_id: uuid(),
-        ...dataProduct
-    }
+  const newProduct = {
+    product_id: uuid(),
+    ...dataProduct
+  }
 
-    try {
-        const product = await db.insert(products).values(newProduct).returning().get();
-        return product;
-    } catch (error) {
-        throw new AppError("Error creating product!", 400);
-    }
+  try {
+    const product = await db.insert(products).values(newProduct).returning().get();
+    return product;
+  } catch (error) {
+    throw new AppError("Error creating product!", 400);
+  }
 }
 
 
@@ -73,15 +73,15 @@ const postProduct = async (dataProduct: ProductWithoutId): Promise<Product> => {
  * @throws {AppError} Throws an error if there is an issue updating the product.
  */
 const putProduct = async (dataProduct: ProductForUpdate, productId: string): Promise<Product> => {
-    try {
-        
-        const product = await db.update(products).set(dataProduct).where(eq(products.product_id, productId)).returning().get();
+  try {
 
-        return product;
+    const product = await db.update(products).set(dataProduct).where(eq(products.product_id, productId)).returning().get();
 
-    } catch (error) {
-        throw new AppError("Error updating product!", 400);
-    }
+    return product;
+
+  } catch (error) {
+    throw new AppError("Error updating product!", 400);
+  }
 }
 
 
@@ -92,17 +92,17 @@ const putProduct = async (dataProduct: ProductForUpdate, productId: string): Pro
  * @throws {AppError} Throws an error if there is an issue deleting the product.
  */
 const deleteProduct = async (productId: string): Promise<void> => {
-    try {
-        await db.delete(products).where(eq(products.product_id, productId));
-    } catch (error) {
-        throw new AppError("Error deleting product!", 400);
-    }
+  try {
+    await db.delete(products).where(eq(products.product_id, productId));
+  } catch (error) {
+    throw new AppError("Error deleting product!", 400);
+  }
 }
 
 export const productService = {
-    getAllProducts,
-    getProductById,
-    postProduct,
-    putProduct,
-    deleteProduct
+  getAllProducts,
+  getProductById,
+  postProduct,
+  putProduct,
+  deleteProduct
 }

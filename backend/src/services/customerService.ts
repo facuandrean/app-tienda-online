@@ -48,9 +48,18 @@ const putCustomer = async (dataCustomer: CustomerWithoutId, customerId: string):
   }
 }
 
+const deleteCustomer = async (customerId: string): Promise<void> => {
+  try {
+    await db.delete(customers).where(eq(customers.customer_id, customerId));
+  } catch (error) {
+    throw new AppError('Error deleting the account of customer!', 400);
+  }
+}
+
 export const customerService = {
   getAllCustomers,
   getCustomerById,
   postCustomer,
-  putCustomer
+  putCustomer,
+  deleteCustomer
 }
