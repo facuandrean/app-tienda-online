@@ -1,9 +1,9 @@
 import type { Request, Response } from "express";
 import { productService } from "../services/productService";
 
-import type { Product, ProductWithoutId } from "../types/types";
+import type { Product, ProductWithoutId, ProductInput, ProductUpdateInput } from "../types/types";
 import { AppError } from "../errors";
-
+import { getCurrentDate } from "../utils/dateUtils";
 
 /**
  * Retrieves all products from the database.
@@ -44,12 +44,7 @@ const getAllProducts = async (_req: Request, res: Response): Promise<void> => {
 const getProductById = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const { productId } = req.params;
-
-    if (!productId) {
-      res.status(400).json({ status: 'Failed', data: "Product id is required!" });
-      return;
-    }
+    const productId = req.params.productId as string;
 
     const product: Product | undefined = await productService.getProductById(productId);
 
@@ -84,28 +79,11 @@ const getProductById = async (req: Request, res: Response): Promise<void> => {
  */
 const postProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const dateUnformatted = new Date().toISOString();
-    const dateFormatted = new Date(dateUnformatted);
-    dateFormatted.setHours(dateFormatted.getHours() - 3);
-    const date = dateFormatted.toISOString();
-
-    const { name, description, price, stock, picture, category_id, featured, active } = req.body as Product;
-
-    if (!name || !description || price == null || stock == null || !category_id ||
-      typeof featured !== "boolean" || typeof active !== "boolean") {
-      res.status(400).json({ status: 'Failed', data: "All fields are required!" });
-      return;
-    }
+    const date = getCurrentDate();
+    const productData = req.body as ProductInput;
 
     const newProduct: ProductWithoutId = {
-      name,
-      description,
-      price: Number(price),
-      stock: Number(stock),
-      picture,
-      category_id,
-      featured: Boolean(featured),
-      active: Boolean(active),
+      ...productData,
       created_at: date,
       updated_at: date
     }
@@ -138,18 +116,9 @@ const postProduct = async (req: Request, res: Response): Promise<void> => {
  */
 const putProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-
-    const dateUnformatted = new Date().toISOString();
-    const dateFormatted = new Date(dateUnformatted);
-    dateFormatted.setHours(dateFormatted.getHours() - 3);
-    const date = dateFormatted.toISOString();
-
-    const { productId } = req.params;
-
-    if (!productId) {
-      res.status(400).json({ status: 'Failed', data: "Product id is required!" });
-      return;
-    }
+    const date = getCurrentDate();
+    const productId = req.params.productId as string;
+    const updateData = req.body as ProductUpdateInput;
 
     const product: Product | undefined = await productService.getProductById(productId);
 
@@ -158,19 +127,11 @@ const putProduct = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { name, description, price, stock, picture, category_id, featured, active } = req.body as Product;
-
     const newDataProduct = {
-      name: name || product.name,
-      description: description || product.description,
-      price: Number(price) || product.price,
-      stock: Number(stock) || product.stock,
-      picture: picture || product.picture,
-      category_id: category_id || product.category_id,
-      featured: Boolean(featured) || product.featured,
-      active: Boolean(active) || product.active,
+      ...product,
+      ...updateData,
       updated_at: date
-    }
+    };
 
     const updatedProduct: Product = await productService.putProduct(newDataProduct, productId);
 
@@ -200,12 +161,7 @@ const putProduct = async (req: Request, res: Response): Promise<void> => {
 const deleteProduct = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const { productId } = req.params;
-
-    if (!productId) {
-      res.status(400).json({ status: 'Failed', data: "Product id is required!" });
-      return;
-    }
+    const productId = req.params.productId as string;
 
     const product: Product | undefined = await productService.getProductById(productId);
 

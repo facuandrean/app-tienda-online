@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import { AppError } from "../errors";
 import { categoryService } from "../services/categoryService";
-import type { Category } from "../types/types";
+import type { Category, CategoryInput, CategoryUpdateInput, CategoryWithoutId } from "../types/types";
+import { getCurrentDate } from "../utils/dateUtils";
 
 
 /**
@@ -43,12 +44,7 @@ const getAllCategories = async (_req: Request, res: Response): Promise<void> => 
 const getCategoryById = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const { categoryId } = req.params;
-
-    if (!categoryId) {
-      res.status(400).json({ status: 'Failed', data: "Category id is required!" });
-      return;
-    }
+    const categoryId = req.params.categoryId as string;
 
     const category: Category | undefined = await categoryService.getCategoryById(categoryId);
 
@@ -84,21 +80,12 @@ const getCategoryById = async (req: Request, res: Response): Promise<void> => {
 const postCategory = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const dateUnformatted = new Date().toISOString();
-    const dateFormatted = new Date(dateUnformatted);
-    dateFormatted.setHours(dateFormatted.getHours() - 3);
-    const date = dateFormatted.toISOString();
+    const date = getCurrentDate();
 
-    const { name, description } = req.body as Category;
+    const categoryData = req.body as CategoryInput;
 
-    if (!name || !description) {
-      res.status(400).json({ status: 'Failed', data: "All fields are required!" });
-      return;
-    }
-
-    const newCategory = {
-      name,
-      description,
+    const newCategory: CategoryWithoutId = {
+      ...categoryData,
       created_at: date,
       updated_at: date
     };
@@ -132,17 +119,10 @@ const postCategory = async (req: Request, res: Response): Promise<void> => {
 const putCategory = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const dateUnformatted = new Date().toISOString();
-    const dateFormatted = new Date(dateUnformatted);
-    dateFormatted.setHours(dateFormatted.getHours() - 3);
-    const date = dateFormatted.toISOString();
+    const date = getCurrentDate();
 
-    const { categoryId } = req.params;
-
-    if (!categoryId) {
-      res.status(400).json({ status: 'Failed', data: 'Category id is required!' });
-      return;
-    };
+    const categoryId = req.params.categoryId as string;
+    const updateData = req.body as CategoryUpdateInput;
 
     const category: Category | undefined = await categoryService.getCategoryById(categoryId);
 
@@ -151,16 +131,9 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
       return;
     };
 
-    const { name, description } = req.body as Category;
-
-    if (!name || !description) {
-      res.status(400).json({ status: 'Failed', data: 'All fields are required!' });
-      return;
-    };
-
     const newDataCategory = {
-      name,
-      description,
+      ...category,
+      ...updateData,
       updated_at: date
     };
 
@@ -169,7 +142,7 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({ status: 'Success', data: updatedCategory });
     return;
 
-  } catch (error) {
+  } catch (error: unknown) {
 
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ status: 'Failed', data: error.message });
@@ -192,12 +165,7 @@ const putCategory = async (req: Request, res: Response): Promise<void> => {
 const deleteCategory = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const { categoryId } = req.params;
-
-    if (!categoryId) {
-      res.status(400).json({ status: 'Failed', data: 'Category id is required!' });
-      return;
-    }
+    const categoryId = req.params.categoryId as string;
 
     const category: Category | undefined = await categoryService.getCategoryById(categoryId);
 
@@ -211,7 +179,7 @@ const deleteCategory = async (req: Request, res: Response): Promise<void> => {
     res.status(201).json({ status: 'Success', data: 'Category successfully deleted' });
     return;
 
-  } catch (error) {
+  } catch (error: unknown) {
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ status: 'Failed', data: error.message });
       return;

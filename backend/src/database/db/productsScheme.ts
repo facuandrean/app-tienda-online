@@ -1,5 +1,4 @@
 import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
-import { categories } from './categoriesScheme';
 import { sql } from 'drizzle-orm';
 
 export const products = sqliteTable('products', {
@@ -9,10 +8,6 @@ export const products = sqliteTable('products', {
   price: real('price').notNull(),
   stock: integer('stock').notNull(),
   picture: text('picture'),
-  category_id: text('category_id').references(() => categories.category_id, {
-    onDelete: "set null",
-    onUpdate: "cascade"
-  }),
   featured: integer('featured', { mode: 'boolean' }).notNull(),
   active: integer('active', { mode: 'boolean' }).notNull(),
   created_at: text('created_at').notNull().default(sql`CURRENT_TIMESTAMP`),

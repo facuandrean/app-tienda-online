@@ -2,7 +2,7 @@ import { db } from "../database/database";
 import { products } from "../database/db/productsScheme";
 import { v4 as uuid } from "uuid";
 
-import type { Product, ProductForUpdate, ProductWithoutId } from "../types/types";
+import type { Product, ProductWithoutId, ProductUpdateInput } from "../types/types";
 import { eq } from "drizzle-orm";
 import { AppError } from "../errors";
 
@@ -67,18 +67,15 @@ const postProduct = async (dataProduct: ProductWithoutId): Promise<Product> => {
 
 /**
  * Updates an existing product in the database.
- * @param {ProductForUpdate} dataProduct - The updated product data.
+ * @param {ProductUpdateInput} dataProduct - The updated product data.
  * @param {string} productId - The ID of the product to update.
  * @returns {Promise<Product>} A promise that resolves to the updated product.
  * @throws {AppError} Throws an error if there is an issue updating the product.
  */
-const putProduct = async (dataProduct: ProductForUpdate, productId: string): Promise<Product> => {
+const putProduct = async (dataProduct: ProductUpdateInput, productId: string): Promise<Product> => {
   try {
-
     const product = await db.update(products).set(dataProduct).where(eq(products.product_id, productId)).returning().get();
-
     return product;
-
   } catch (error) {
     throw new AppError("Error updating product!", 400);
   }

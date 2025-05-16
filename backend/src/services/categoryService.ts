@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { db } from "../database/database";
 import { categories } from "../database/db/categoriesScheme";
 import { AppError } from "../errors";
-import type { Category, CategoryForUpdate, CategoryWithoutId } from "../types/types";
+import type { Category, CategoryUpdateInput, CategoryWithoutId } from "../types/types";
 import { v4 as uuid } from "uuid";
 import { products } from "../database/db/productsScheme";
 
@@ -54,7 +54,7 @@ const getCategoryById = async (categoryId: string): Promise<Category | undefined
  * @throws {AppError} Throws an error if there is an issue creating the category.
  */
 const postCategory = async (dataCategory: CategoryWithoutId): Promise<Category> => {
-  const newCategory = {
+  const newCategory: Category = {
     category_id: uuid(),
     ...dataCategory
   }
@@ -71,18 +71,15 @@ const postCategory = async (dataCategory: CategoryWithoutId): Promise<Category> 
 /**
  * Updates an existing category in the database.
  * 
- * @param {CategoryForUpdate} dataCategory - The updated data for the category.
+ * @param {CategoryUpdateInput} dataCategory - The updated data for the category.
  * @param {string} categoryId - The ID of the category to update.
  * @returns {Promise<Category>} A promise that resolves to the updated category.
  * @throws {AppError} Throws an error if there is an issue updating the category.
  */
-const putCategory = async (dataCategory: CategoryForUpdate, categoryId: string): Promise<Category> => {
+const putCategory = async (dataCategory: CategoryUpdateInput, categoryId: string): Promise<Category> => {
   try {
-
     const category = await db.update(categories).set(dataCategory).where(eq(categories.category_id, categoryId)).returning().get();
-
     return category;
-
   } catch (error) {
     throw new AppError('Error updating category!', 400)
   }
@@ -98,14 +95,7 @@ const putCategory = async (dataCategory: CategoryForUpdate, categoryId: string):
  */
 const deleteCategory = async (categoryId: string): Promise<void> => {
   try {
-    const nulleable = await db.update(products).set({ category_id: null }).where(eq(products.category_id, categoryId));
-
-    if (nulleable) {
-      await db.delete(categories).where(eq(categories.category_id, categoryId));
-    } else {
-      throw new AppError('Error updating foreign key', 400);
-    }
-
+    await db.delete(categories).where(eq(categories.category_id, categoryId));
   } catch (error: any) {
     throw new AppError(error, 400);
   }
