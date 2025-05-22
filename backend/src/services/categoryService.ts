@@ -4,7 +4,6 @@ import { categories } from "../database/db/categoriesScheme";
 import { AppError } from "../errors";
 import type { Category, CategoryUpdateInput, CategoryWithoutId } from "../types/types";
 import { v4 as uuid } from "uuid";
-import { products } from "../database/db/productsScheme";
 
 
 /**

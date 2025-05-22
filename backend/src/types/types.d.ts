@@ -4,6 +4,10 @@ import { products } from '../database/db/productsScheme';
 import { InferModel } from 'drizzle-orm';
 import { categories } from '../database/db/categoriesScheme';
 import type { categorySchema, categoryUpdateSchema } from '../schemas/categorySchema';
+import type { users } from '../database/db/usersScheme';
+import type { userSchema, userUpdateSchema } from '../schemas/userSchema';
+import type { productCategories } from '../database/db/productCategoriesScheme';
+import type { productCategorySchema, productCategoryUpdateSchema } from '../schemas/productCategorySchema';
 
 
 // InferModel is used to infer the type of the product from the database schema
@@ -26,6 +30,28 @@ export type CategoryWithoutId = Omit<Category, 'category_id'>;
 export type CategoryInput = Input<typeof categorySchema>;
 
 export type CategoryUpdateInput = Input<typeof categoryUpdateSchema>;
+
+
+export type ProductCategory = InferModel<typeof productCategories>;
+
+export type UUID = `${string}-${string}-${string}-${string}-${string}`;
+export const isUUID = (value: string): value is UUID => {
+  const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidV4Regex.test(value);
+};
+
+export type ProductCategoryInput = Input<typeof productCategorySchema>;
+
+export type ProductCategoryUpdateInput = Input<typeof productCategoryUpdateSchema>;
+
+
+export type User = InferModel<typeof users>;
+
+export type UserWithoutId = Omit<User, 'user_id'>;
+
+export type UserInput = Input<typeof userSchema>;
+
+export type UserUpdateInput = Input<typeof userUpdateSchema>;
 
 
 export interface Customer {

@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { db } from "../database/database";
-import { customers } from "../database/db/customerScheme";
+import { customers } from "../database/db/customersScheme";
 import { AppError } from "../errors";
 import { v4 as uuid } from "uuid";
 import type { Customer, CustomerWithoutId } from "../types/types";
