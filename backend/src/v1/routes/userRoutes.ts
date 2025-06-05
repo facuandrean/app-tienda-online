@@ -5,7 +5,8 @@ import { userSchema, userUpdateSchema } from "../../schemas/userSchema";
 
 const userRouter = Router();
 
-userRouter.post("/register", validateBody(false, userUpdateSchema, userSchema), userController.registerUser);
+userRouter.post("/singup", validateBody(false, userUpdateSchema, userSchema), userController.registerUser);
 userRouter.post("/signin", validateBody(false, userUpdateSchema, userSchema), userController.loginUser);
+// userRouter.post("/logout", userController.logoutUser);
 
 export default userRouter;

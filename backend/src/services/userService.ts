@@ -7,16 +7,19 @@ import type { User } from "../types/types";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcrypt";
 
-const registerUser = async (dataUser: UserWithoutId): Promise<User> => {
 
+const getUserByEmail = async (email: string): Promise<User | undefined> => {
   try {
+    const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
+    return existingUser;
+  } catch (error) {
+    throw new AppError('Failed to get user by email', 400);
+  }
+}
 
-    const existingUser = await db.select().from(users).where(eq(users.email, dataUser.email));
 
-    if (existingUser.length > 0) {
-      throw new AppError('User already exists', 400);
-    }
-
+const registerUser = async (dataUser: UserWithoutId): Promise<User> => {
+  try {
     const hashedPassword = await bcrypt.hash(dataUser.password, 10);
 
     const newUser = {
@@ -30,30 +33,25 @@ const registerUser = async (dataUser: UserWithoutId): Promise<User> => {
   } catch (error) {
     throw new AppError('Failed to register a new user', 400);
   }
-
 };
 
-const loginUser = async (email: string, password: string): Promise<User> => {
+
+const loginUser = async (password: string, existingUser: User): Promise<User> => {
   try {
-    const user = await db.select().from(users).where(eq(users.email, email)).get();
-
-    if (!user) {
-      throw new AppError('User not found or not exists', 400);
-    }
-
-    const isValid = await bcrypt.compare(password, user.password);
+    const isValid = await bcrypt.compare(password, existingUser.password);
 
     if (!isValid) {
       throw new AppError('Invalid password', 400);
     };
 
-    return { email: user.email, user_id: user.user_id } = user;
+    return { email: existingUser.email, user_id: existingUser.user_id } = existingUser;
   } catch (error) {
     throw new AppError('Failed to login', 400);
   }
 }
 
 export const userService = {
+  getUserByEmail,
   registerUser,
   loginUser,
 }
