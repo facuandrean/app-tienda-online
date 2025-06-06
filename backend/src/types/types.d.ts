@@ -53,6 +53,8 @@ export type UserInput = Input<typeof userSchema>;
 
 export type UserUpdateInput = Input<typeof userUpdateSchema>;
 
+export type UserToken = Pick<User, 'user_id' | 'email' | 'role_user'>;
+
 
 export interface Customer {
   customer_id: string;

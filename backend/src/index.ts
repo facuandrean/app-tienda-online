@@ -5,9 +5,11 @@ import categoryRouter from "./v1/routes/categoryRoutes";
 import routerProductCategories from "./v1/routes/productCategoriesRoutes";
 import userRouter from "./v1/routes/userRoutes";
 import config from "./config";
+import cookieParser from 'cookie-parser';
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/products", productRoutes);

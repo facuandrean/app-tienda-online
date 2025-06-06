@@ -2,10 +2,11 @@ import { eq } from "drizzle-orm";
 import { db } from "../database/database";
 import { users } from "../database/db/usersScheme";
 import { AppError } from "../errors";
-import type { UserWithoutId } from "../types/types";
+import type { UserToken, UserWithoutId } from "../types/types";
 import type { User } from "../types/types";
 import { v4 as uuid } from "uuid";
 import bcrypt from "bcrypt";
+import { generateToken } from "../utils/jwtUtils";
 
 
 const getUserByEmail = async (email: string): Promise<User | undefined> => {
@@ -36,15 +37,24 @@ const registerUser = async (dataUser: UserWithoutId): Promise<User> => {
 };
 
 
-const loginUser = async (password: string, existingUser: User): Promise<User> => {
+const loginUser = async (password: string, existingUser: User): Promise<{ user: UserToken; token: string }> => {
   try {
     const isValid = await bcrypt.compare(password, existingUser.password);
 
     if (!isValid) {
       throw new AppError('Invalid password', 400);
-    };
+    }
 
-    return { email: existingUser.email, user_id: existingUser.user_id } = existingUser;
+    const token = generateToken(existingUser);
+
+    return {
+      user: {
+        email: existingUser.email,
+        user_id: existingUser.user_id,
+        role_user: existingUser.role_user
+      },
+      token
+    };
   } catch (error) {
     throw new AppError('Failed to login', 400);
   }

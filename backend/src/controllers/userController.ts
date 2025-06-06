@@ -3,12 +3,13 @@ import { AppError } from "../errors";
 import { getCurrentDate } from "../utils/dateUtils";
 import type { User, UserInput, UserWithoutId } from "../types/types";
 import { userService } from "../services/userService";
+import config from "../config";
 
 const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
 
     const userData = req.body as UserInput;
-    const role = userData.adminToken === process.env.ADMIN_TOKEN ? 'Admin' : 'Customer';
+    const role = userData.adminToken === config.adminToken ? 'Admin' : 'Customer';
 
     const existingUser = await userService.getUserByEmail(userData.email);
 
@@ -51,9 +52,22 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
       throw new AppError('User not found or not exists', 400);
     }
 
-    const user = await userService.loginUser(password, existingUser);
+    const { user, token } = await userService.loginUser(password, existingUser);
 
-    res.status(200).json({ status: 'Success', data: user })
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1 * 60 * 60 * 1000
+    });
+
+    res.status(200).json({
+      status: 'Success',
+      data: {
+        user,
+        message: 'Login successful'
+      }
+    });
 
   } catch (error) {
     if (error instanceof AppError) {
@@ -66,36 +80,22 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-
-// const logoutUser = async (_req: Request, res: Response): Promise<void> => {
-//   try {
-//     // Limpiar la cookie de sesión si existe
-//     res.clearCookie('token');
-
-//     // Si estás usando JWT en el header Authorization, podrías querer invalidar el token
-//     // Esto requeriría mantener una lista negra de tokens en tu base de datos
-
-//     res.status(200).json({
-//       status: 'Success',
-//       data: 'User logged out successfully'
-//     });
-//     return;
-
-//   } catch (error) {
-//     if (error instanceof AppError) {
-//       res.status(error.statusCode).json({ status: 'Failed', data: error.message });
-//       return;
-//     }
-
-//     res.status(500).json({ status: 'Failed', data: 'Internal Server Error' });
-//     return;
-//   }
-// }
+const logoutUser = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    res.clearCookie('jwt');
+    res.status(200).json({
+      status: 'Success',
+      data: { message: 'Logout successful' }
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'Failed', data: 'Internal Server Error' });
+  }
+}
 
 export const userController = {
   registerUser,
   loginUser,
-  // logoutUser
+  logoutUser
 }
 
 
