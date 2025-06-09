@@ -1,5 +1,4 @@
-import { email, minLength, object, pipe, regex, string, optional, custom } from "valibot";
-import config from "../config";
+import { email, minLength, object, pipe, regex, string, optional } from "valibot";
 
 /**
  * Schema for validating user creation data
@@ -23,7 +22,7 @@ export const userSchema = object({
   email: pipe(
     string(),
     email('Invalid email'),
-    regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format')
+    regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format. Format: example@example.com')
   ),
   password: pipe(
     string(),

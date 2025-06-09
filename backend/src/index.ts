@@ -11,7 +11,9 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// Public routes.
 app.use("/api/v1/users", userRouter);
+
 app.use("/api/v1/products", productRoutes);
 app.use("/api/v1/categories", categoryRouter);
 app.use("/api/v1/product-categories", routerProductCategories);
