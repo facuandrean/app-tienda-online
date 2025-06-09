@@ -1,8 +1,14 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-// import type { UserToken } from "../types/types";
 import config from "../config";
 
+/**
+ * Verifies the JWT token in the request cookies.
+ * 
+ * @param req - The HTTP request object.
+ * @param res - The HTTP response object.
+ * @param next - The next function to call.
+ */
 export const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.cookies.jwt;
 

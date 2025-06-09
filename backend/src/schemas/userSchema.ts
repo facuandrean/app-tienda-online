@@ -33,8 +33,7 @@ export const userSchema = object({
   // Custom: method to validate if the admin token is valid. Its work with the config.adminToken, if the token is valid, the user will be created as an admin.
   adminToken: optional(
     pipe(
-      string(),
-      custom((input: unknown) => typeof input === 'string' && input === config.adminToken, 'Invalid admin token')
+      string()
     )
   )
 })
@@ -68,4 +67,20 @@ export const userUpdateSchema = object({
       regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character')
     )
   )
+})
+
+/**
+ * Schema for validating user login data
+ * @property {string} email - User's email address (must be valid format)
+ * @property {string} password - User's password (min 8 chars, must contain uppercase, lowercase, number and special char)
+ */
+export const userLoginSchema = object({
+  email: pipe(
+    string(),
+    email('Invalid email'),
+    regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format')
+  ),
+  password: pipe(
+    string()
+  ),
 })

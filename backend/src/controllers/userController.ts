@@ -1,10 +1,18 @@
 import type { Request, Response } from "express";
 import { AppError } from "../errors";
 import { getCurrentDate } from "../utils/dateUtils";
-import type { User, UserInput, UserWithoutId } from "../types/types";
+import type { User, UserInput, UserLoginInput, UserWithoutId } from "../types/types";
 import { userService } from "../services/userService";
 import config from "../config";
 
+
+/**
+ * Registers a new user.
+ * 
+ * @param req - The HTTP request object containing the user data in the body.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the newly created user data.
+ */
 const registerUser = async (req: Request, res: Response): Promise<void> => {
   try {
 
@@ -42,9 +50,16 @@ const registerUser = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
+/**
+ * Logs in a user and generates a JWT token.
+ * 
+ * @param req - The HTTP request object containing the user data in the body.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the user data.
+ */
 const loginUser = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body as UserInput;
+    const { email, password } = req.body as UserLoginInput;
 
     const existingUser = await userService.getUserByEmail(email);
 
@@ -80,6 +95,13 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
+/**
+ * Logs out a user by clearing the JWT cookie.
+ * 
+ * @param req - The HTTP request object.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and a message.
+ */
 const logoutUser = async (_req: Request, res: Response): Promise<void> => {
   try {
     res.clearCookie('jwt');

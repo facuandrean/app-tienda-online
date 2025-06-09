@@ -9,6 +9,12 @@ import bcrypt from "bcrypt";
 import { generateToken } from "../utils/jwtUtils";
 
 
+/**
+ * Retrieves a user by their email address.
+ * 
+ * @param email - The email address of the user to retrieve.
+ * @returns A promise that resolves to the user if found, or undefined if not found.
+ */
 const getUserByEmail = async (email: string): Promise<User | undefined> => {
   try {
     const existingUser = await db.select().from(users).where(eq(users.email, email)).get();
@@ -19,6 +25,12 @@ const getUserByEmail = async (email: string): Promise<User | undefined> => {
 }
 
 
+/**
+ * Registers a new user and hashes the password.
+ * 
+ * @param dataUser - The user data to register.
+ * @returns A promise that resolves to the newly created user.
+ */
 const registerUser = async (dataUser: UserWithoutId): Promise<User> => {
   try {
     const hashedPassword = await bcrypt.hash(dataUser.password, 10);
@@ -37,6 +49,13 @@ const registerUser = async (dataUser: UserWithoutId): Promise<User> => {
 };
 
 
+/**
+ * Logs in a user and generates a JWT token.
+ * 
+ * @param password - The password of the user.
+ * @param existingUser - The user to login.
+ * @returns A promise that resolves to the user and token.
+ */
 const loginUser = async (password: string, existingUser: User): Promise<{ user: UserToken; token: string }> => {
   try {
     const isValid = await bcrypt.compare(password, existingUser.password);

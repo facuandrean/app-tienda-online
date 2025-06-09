@@ -1,7 +1,8 @@
 import type { Request, Response } from 'express';
 import { AppError } from '../errors';
 import { productCategoriesService } from '../services/productCategoriesService';
-import { isUUID, type Category, type Product } from '../types/types';
+import { isUUID } from '../utils/uuid';
+import type { Category, Product, ProductCategoryInput, UUIDInput } from '../types/types';
 
 /**
  * Retrieves all products by category from the database.
@@ -12,7 +13,7 @@ import { isUUID, type Category, type Product } from '../types/types';
  */
 const getProductsByCategory = async (req: Request, res: Response): Promise<void> => {
   try {
-    const categoryId = req.params.categoryId as string;
+    const { categoryId } = req.params as UUIDInput;
 
     const productsByCategory: Product[] = await productCategoriesService.getProductsByCategory(categoryId);
 
@@ -40,7 +41,7 @@ const getProductsByCategory = async (req: Request, res: Response): Promise<void>
 const getCategoriesByProduct = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const productId = req.params.productId as string;
+    const { productId } = req.params as UUIDInput;
 
     const categoriesByProduct: Category[] = await productCategoriesService.getCategoriesByProduct(productId);
 
@@ -67,8 +68,7 @@ const getCategoriesByProduct = async (req: Request, res: Response): Promise<void
 */
 const assignCategoryToProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const productId = req.params.productId as string;
-    const categoryId = req.params.categoryId as string;
+    const { productId, categoryId } = req.body as ProductCategoryInput;
 
     if (!isUUID(productId) || !isUUID(categoryId)) {
       res.status(400).json({ status: 'Failed', data: 'Invalid product or category ID' });
@@ -101,8 +101,7 @@ const assignCategoryToProduct = async (req: Request, res: Response): Promise<voi
  */
 const unassignCategoryFromProduct = async (req: Request, res: Response): Promise<void> => {
   try {
-    const productId = req.params.productId as string;
-    const categoryId = req.params.categoryId as string;
+    const { productId, categoryId } = req.params as ProductCategoryInput;
 
     if (!isUUID(productId) || !isUUID(categoryId)) {
       res.status(400).json({ status: 'Failed', data: 'Invalid product or category ID' });
