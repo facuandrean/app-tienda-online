@@ -10,6 +10,8 @@ import type { productCategories } from '../database/db/productCategoriesScheme';
 import type { productCategorySchema, productCategoryUpdateSchema } from '../schemas/productCategorySchema';
 import type { productCategoriesSchema, productCategoriesUpdateSchema } from '../schemas/productCategoriesSchema';
 import type { uuidSchema } from '../schemas/uuidSchema';
+import type { customers } from '../database/db/customersScheme';
+import type { customerSchema, customerUpdateSchema } from '../schemas/customerSchema';
 
 
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
@@ -58,16 +60,10 @@ export type UserLoginInput = Input<typeof userLoginSchema>;
 export type UserToken = Pick<User, 'user_id' | 'email' | 'role_user'>;
 
 
-export interface Customer {
-  customer_id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
-  country: string;
-  neighborhood: string;
-  created_at: string;
-}
+export type Customer = InferModel<typeof customers>;
 
 export type CustomerWithoutId = Omit<Customer, 'customer_id'>;
+
+export type CustomerInput = Input<typeof customerSchema>;
+
+export type CustomerUpdateInput = Input<typeof customerUpdateSchema>;

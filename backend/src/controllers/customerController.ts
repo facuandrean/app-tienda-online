@@ -1,13 +1,14 @@
 import type { Request, Response } from "express";
 import { AppError } from "../errors";
-import type { Customer } from "../types/types";
+import type { Customer, CustomerInput, CustomerUpdateInput, CustomerWithoutId } from "../types/types";
 import { customerService } from "../services/customerService";
+import { getCurrentDate } from "../utils/dateUtils";
 
 /**
- * Obtiene todos los clientes registrados en el sistema
- * @param {Request} _req - Objeto de solicitud Express (no utilizado)
- * @param {Response} res - Objeto de respuesta Express
- * @returns {Promise<void>} No retorna valor, envía la respuesta HTTP
+ * Get all customers.
+ * @param {Request} _req - Express request object (not used)
+ * @param {Response} res - Express response object
+ * @returns {Promise<void>} No return value, sends HTTP response
  */
 const getAllCustomers = async (_req: Request, res: Response): Promise<void> => {
   try {
@@ -28,20 +29,15 @@ const getAllCustomers = async (_req: Request, res: Response): Promise<void> => {
 
 
 /**
- * Obtiene un cliente específico por su ID
- * @param {Request} req - Objeto de solicitud Express que contiene el ID del cliente en los parámetros
- * @param {Response} res - Objeto de respuesta Express
- * @returns {Promise<void>} No retorna valor, envía la respuesta HTTP
+ * Get a customer by id.
+ * @param {Request} req - Express request object that contains the customer id in the parameters
+ * @param {Response} res - Express response object
+ * @returns {Promise<void>} No return value, sends HTTP response
  */
 const getCustomerById = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const { customerId } = req.params;
-
-    if (!customerId) {
-      res.status(400).json({ status: 'Failed', data: 'The id of customer is required!' });
-      return;
-    }
+    const customerId = req.params.customerId as string;
 
     const customer: Customer | undefined = await customerService.getCustomerById(customerId);
 
@@ -72,28 +68,15 @@ const getCustomerById = async (req: Request, res: Response): Promise<void> => {
  */
 const postCustomer = async (req: Request, res: Response): Promise<void> => {
   try {
-    const dateUnformatted = new Date().toISOString();
-    const dateFormatted = new Date(dateUnformatted);
-    dateFormatted.setHours(dateFormatted.getHours() - 3);
-    const date = dateFormatted.toISOString();
+    const date = getCurrentDate();
 
-    const { name, email, phone, address, city, country, neighborhood } = req.body as Customer;
+    const customerData = req.body as CustomerInput;
 
-    if (!name || !email || !phone || !address || !city || !country || !neighborhood) {
-      res.status(400).json({ status: 'Failed', data: "All fields are required!" });
-      return;
+    const newCustomer: CustomerWithoutId = {
+      ...customerData,
+      created_at: date,
+      updated_at: date
     };
-
-    const newCustomer = {
-      name,
-      email,
-      phone,
-      address,
-      city,
-      country,
-      neighborhood,
-      created_at: date
-    }
 
     const customer: Customer = await customerService.postCustomer(newCustomer);
 
@@ -112,20 +95,17 @@ const postCustomer = async (req: Request, res: Response): Promise<void> => {
 }
 
 /**
- * Actualiza los datos de un cliente existente
- * @param {Request} req - Objeto de solicitud Express que contiene el ID del cliente en los parámetros y los nuevos datos en el cuerpo
- * @param {Response} res - Objeto de respuesta Express
- * @returns {Promise<void>} No retorna valor, envía la respuesta HTTP
+ * Update the data of an existing customer.
+ * @param {Request} req - Express request object that contains the customer id in the parameters and the new data in the body
+ * @param {Response} res - Express response object
+ * @returns {Promise<void>} No return value, sends HTTP response
  */
 const putCustomer = async (req: Request, res: Response): Promise<void> => {
   try {
 
-    const { customerId } = req.params;
+    const date = getCurrentDate();
 
-    if (!customerId) {
-      res.status(400).json({ status: 'Failed', data: 'Customer id is required!' });
-      return;
-    }
+    const customerId = req.params.customerId as string;
 
     const customer = await customerService.getCustomerById(customerId);
 
@@ -134,17 +114,12 @@ const putCustomer = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { name, email, phone, address, city, country, neighborhood } = req.body as Customer;
+    const customerData = req.body as CustomerUpdateInput;
 
     const newDataCustomer = {
-      name: name || customer.name,
-      email: email || customer.email,
-      phone: phone || customer.phone,
-      address: address || customer.address,
-      city: city || customer.city,
-      country: country || customer.country,
-      neighborhood: neighborhood || customer.neighborhood,
-      created_at: customer.created_at
+      ...customer,
+      ...customerData,
+      updated_at: date
     }
 
     const updatedCustomer = await customerService.putCustomer(newDataCustomer, customerId);
@@ -163,15 +138,15 @@ const putCustomer = async (req: Request, res: Response): Promise<void> => {
   }
 }
 
-
+/**
+ * Delete a customer.
+ * @param {Request} req - Express request object that contains the customer id in the parameters
+ * @param {Response} res - Express response object
+ * @returns {Promise<void>} No return value, sends HTTP response
+ */
 const deleteCustomer = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { customerId } = req.params;
-
-    if (!customerId) {
-      res.status(400).json({ status: 'Failed', data: 'Customer id is required!' });
-      return;
-    }
+    const customerId = req.params.customerId as string;
 
     const customer: Customer | undefined = await customerService.getCustomerById(customerId);
 
