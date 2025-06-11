@@ -77,18 +77,6 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
       path: '/' // Asegurarse de que la cookie esté disponible en todas las rutas
     });
 
-    console.log('Cookie configurada:', {
-      name: 'jwt',
-      value: token,
-      options: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        maxAge: 1 * 60 * 60 * 1000,
-        path: '/'
-      }
-    });
-
     res.status(200).json({
       status: 'Success',
       data: {
@@ -128,6 +116,38 @@ const logoutUser = async (_req: Request, res: Response): Promise<void> => {
 }
 
 
+/**
+ * Gets all users.
+ * 
+ * @param req - The HTTP request object.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the user data.
+ */
+const getAllUsers = async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const users: User[] = await userService.getAllUsers();
+
+    res.status(200).json({ status: 'Success', data: users });
+    return;
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ status: 'Failed', data: error.message });
+      return;
+    }
+
+    res.status(500).json({ status: 'Failed', data: 'Internal Server Error' });
+    return;
+  }
+}
+
+
+/**
+ * Gets a user by their ID.
+ * 
+ * @param req - The HTTP request object containing the user ID in the params.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the user data.
+ */
 const getUserById = async (req: Request, res: Response): Promise<void> => {
   try {
     const userId = req.params.userId as string;
@@ -153,18 +173,25 @@ const getUserById = async (req: Request, res: Response): Promise<void> => {
 }
 
 
+/**
+ * Updates a user's profile.
+ * 
+ * @param req - The HTTP request object containing the user data in the body.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and the updated user data.
+ */
 const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
     const date = getCurrentDate();
 
     const userId = req.params.userId as string;
 
-    const user = req.body.user as UserUpdateInput;
+    const user = req.body as UserUpdateInput;
 
     const userProfile: User | undefined = await userService.getUserById(userId);
 
     if (!userProfile) {
-      throw new AppError('An error occurred while getting the user profile', 400);
+      throw new AppError('User not found or not exists', 400);
     }
 
     const newDataUser = {
@@ -189,12 +216,41 @@ const updateUserProfile = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
+/**
+ * Deletes a user by their ID.
+ * 
+ * @param req - The HTTP request object containing the user ID in the params.
+ * @param res - The HTTP response object.
+ * @returns A JSON response containing the status and a message.
+ */
+const deleteUser = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.userId as string;
+
+    await userService.deleteUser(userId);
+
+    res.status(200).json({ status: 'Success', data: { message: 'User deleted successfully' } });
+    return;
+
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ status: 'Failed', data: error.message });
+      return;
+    }
+
+    res.status(500).json({ status: 'Failed', data: 'Internal Server Error' });
+    return;
+  }
+}
+
 export const userController = {
+  getAllUsers,
   getUserById,
   registerUser,
   loginUser,
   logoutUser,
-  updateUserProfile
+  updateUserProfile,
+  deleteUser
 }
 
 

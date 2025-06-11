@@ -12,7 +12,11 @@ userRouter.post("/signup", validateBody(false, userSchema, userSchema), userCont
 userRouter.post("/signin", validateBody(false, userLoginSchema, userLoginSchema), userController.loginUser);
 userRouter.post("/logout", userController.logoutUser);
 
+userRouter.get("/", verifyToken, checkRole(["Admin"]), userController.getAllUsers);
+
 userRouter.get("/profile/:userId", verifyToken, checkRole(["Admin", "Customer"]), checkOwnership, userController.getUserById);
 userRouter.patch("/profile/:userId", verifyToken, checkRole(["Admin", "Customer"]), checkOwnership, validateBody(true, userUpdateSchema, userSchema), userController.updateUserProfile);
+
+userRouter.delete("/:userId", verifyToken, checkRole(["Admin"]), userController.deleteUser);
 
 export default userRouter;

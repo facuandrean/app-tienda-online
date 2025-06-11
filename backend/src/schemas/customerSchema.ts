@@ -43,10 +43,6 @@ export const customerSchema = object({
 });
 
 export const customerUpdateSchema = object({
-  user_id: optional(pipe(
-    string(),
-    custom((input) => isUUID(input as string), 'Invalid user ID format')
-  )),
   phone: optional(pipe(
     string(),
     minLength(10, "The number must be at least 10 digits"),

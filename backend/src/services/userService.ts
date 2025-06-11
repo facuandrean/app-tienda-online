@@ -80,6 +80,27 @@ const loginUser = async (password: string, existingUser: User): Promise<{ user: 
 }
 
 
+/**
+ * Retrieves all users.
+ * 
+ * @returns A promise that resolves to an array of users.
+ */
+const getAllUsers = async (): Promise<User[]> => {
+  try {
+    const allUsers = await db.select().from(users);
+    return allUsers;
+  } catch (error) {
+    throw new AppError('An error occurred while getting all users', 400);
+  }
+}
+
+
+/**
+ * Retrieves a user by their ID.
+ * 
+ * @param userId - The ID of the user to retrieve.
+ * @returns A promise that resolves to the user if found, or undefined if not found.
+ */
 const getUserById = async (userId: string): Promise<User | undefined> => {
   try {
     const user = await db.select().from(users).where(eq(users.user_id, userId)).get();
@@ -91,9 +112,23 @@ const getUserById = async (userId: string): Promise<User | undefined> => {
 }
 
 
+/**
+ * Updates a user's profile.
+ * 
+ * @param user - The user data to update.
+ * @param userId - The ID of the user to update.
+ * @returns A promise that resolves to the updated user.
+ */
 const updateUser = async (user: User, userId: string): Promise<User> => {
   try {
-    const updatedUser = await db.update(users).set(user).where(eq(users.user_id, userId)).returning().get();
+    const hashedPassword = await bcrypt.hash(user.password, 10);
+
+    const newUser = {
+      ...user,
+      password: hashedPassword
+    }
+
+    const updatedUser = await db.update(users).set(newUser).where(eq(users.user_id, userId)).returning().get();
     return updatedUser;
   } catch (error) {
     throw new AppError('Failed to update user', 400);
@@ -101,12 +136,29 @@ const updateUser = async (user: User, userId: string): Promise<User> => {
 }
 
 
+/**
+ * Deletes a user by their ID.
+ * 
+ * @param userId - The ID of the user to delete.
+ * @returns A promise that resolves to void.
+ */
+const deleteUser = async (userId: string): Promise<void> => {
+  try {
+    await db.delete(users).where(eq(users.user_id, userId));
+  } catch (error) {
+    throw new AppError('Failed to delete user', 400);
+  }
+}
+
+
 export const userService = {
+  getAllUsers,
   getUserById,
   getUserByEmail,
   registerUser,
   loginUser,
-  updateUser
+  updateUser,
+  deleteUser
 }
 
 
