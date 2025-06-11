@@ -1,32 +1,26 @@
 import type { Request, Response, NextFunction } from 'express';
-import { db } from '../database/database';
-import { customers } from '../database/db/customersScheme';
-import { eq } from 'drizzle-orm';
 
 export const checkOwnership = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const customerId = req.params.customerId as string;
-    const userId = req.body.user?.user_id as string;
+    const userIdSearched = req.params.userId as string;
+    const activeUserId = req.body.user?.user_id as string;
+
+    console.log('userIdSearched', userIdSearched);
+    console.log('activeUserId', activeUserId);
 
     if (req.body.user?.role_user === 'Admin') {
       next();
       return;
     }
 
-    const customer = await db.select().from(customers).where(eq(customers.customer_id, customerId)).get();
-
-    if (!customer) {
-      res.status(404).json({ status: 'Failed', data: 'Customer not found' });
-      return;
-    }
-
-    if (customer.user_id !== userId) {
+    if (userIdSearched !== activeUserId) {
       res.status(403).json({ status: 'Failed', data: 'You do not have permission to access this resource' });
       return;
     }
 
     next();
   } catch (error) {
+    console.log('error', error);
     res.status(500).json({ status: 'Failed', data: 'Error verifying resource ownership' });
   }
 }; 

@@ -8,8 +8,10 @@ import type { NextFunction, Request, Response } from "express";
  */
 export const checkRole = (roles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
-
-    console.log(req.body);
+    // Asegurarnos de que req.body exista
+    if (!req.body) {
+      req.body = {};
+    }
 
     if (!req.body.user) {
       res.status(401).json({ status: 'Failed', data: 'Not authorized.' });

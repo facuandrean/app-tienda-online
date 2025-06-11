@@ -9,7 +9,7 @@ const customerRoutes = express.Router();
 customerRoutes.get("/", verifyToken, checkRole(["Admin"]), customerController.getAllCustomers);
 customerRoutes.get("/:customerId", verifyToken, checkRole(["Admin", "Customer"]), checkOwnership, customerController.getCustomerById);
 customerRoutes.post("/", verifyToken, checkRole(["Admin"]), customerController.postCustomer);
-customerRoutes.put("/:customerId", verifyToken, checkRole(["Admin", "Customer"]), checkOwnership, customerController.putCustomer);
+customerRoutes.patch("/:customerId", verifyToken, checkRole(["Admin", "Customer"]), checkOwnership, customerController.putCustomer);
 customerRoutes.delete("/:customerId", verifyToken, checkRole(["Admin"]), customerController.deleteCustomer);
 
 export default customerRoutes;

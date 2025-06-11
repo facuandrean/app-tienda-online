@@ -79,10 +79,34 @@ const loginUser = async (password: string, existingUser: User): Promise<{ user: 
   }
 }
 
+
+const getUserById = async (userId: string): Promise<User | undefined> => {
+  try {
+    const user = await db.select().from(users).where(eq(users.user_id, userId)).get();
+
+    return user;
+  } catch (error) {
+    throw new AppError('Failed to get user profile', 400);
+  }
+}
+
+
+const updateUser = async (user: User, userId: string): Promise<User> => {
+  try {
+    const updatedUser = await db.update(users).set(user).where(eq(users.user_id, userId)).returning().get();
+    return updatedUser;
+  } catch (error) {
+    throw new AppError('Failed to update user', 400);
+  }
+}
+
+
 export const userService = {
+  getUserById,
   getUserByEmail,
   registerUser,
   loginUser,
+  updateUser
 }
 
 

@@ -2,7 +2,7 @@ import { object, pipe, string, regex, minLength, maxLength, nonEmpty, optional, 
 import { isUUID } from "../utils/uuid";
 
 export const customerSchema = object({
-  userId: pipe(
+  user_id: pipe(
     string(),
     custom((input) => isUUID(input as string), 'Invalid user ID format')
   ),
@@ -43,7 +43,7 @@ export const customerSchema = object({
 });
 
 export const customerUpdateSchema = object({
-  userId: optional(pipe(
+  user_id: optional(pipe(
     string(),
     custom((input) => isUUID(input as string), 'Invalid user ID format')
   )),

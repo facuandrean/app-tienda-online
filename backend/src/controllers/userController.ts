@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { AppError } from "../errors";
 import { getCurrentDate } from "../utils/dateUtils";
-import type { User, UserInput, UserLoginInput, UserWithoutId } from "../types/types";
+import type { User, UserInput, UserLoginInput, UserUpdateInput, UserWithoutId } from "../types/types";
 import { userService } from "../services/userService";
 import config from "../config";
 
@@ -73,7 +73,20 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 1 * 60 * 60 * 1000
+      maxAge: 1 * 60 * 60 * 1000, // 1 hora
+      path: '/' // Asegurarse de que la cookie esté disponible en todas las rutas
+    });
+
+    console.log('Cookie configurada:', {
+      name: 'jwt',
+      value: token,
+      options: {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 1 * 60 * 60 * 1000,
+        path: '/'
+      }
     });
 
     res.status(200).json({
@@ -114,10 +127,74 @@ const logoutUser = async (_req: Request, res: Response): Promise<void> => {
   }
 }
 
+
+const getUserById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.params.userId as string;
+
+    const profile: User | undefined = await userService.getUserById(userId);
+
+    if (!profile) {
+      throw new AppError('An error occurred while getting the user profile', 400);
+    }
+
+    res.status(200).json({ status: 'Success', data: profile });
+    return;
+
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ status: 'Failed', data: error.message });
+      return;
+    }
+
+    res.status(500).json({ status: 'Failed', data: 'Internal Server Error' });
+    return;
+  }
+}
+
+
+const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const date = getCurrentDate();
+
+    const userId = req.params.userId as string;
+
+    const user = req.body.user as UserUpdateInput;
+
+    const userProfile: User | undefined = await userService.getUserById(userId);
+
+    if (!userProfile) {
+      throw new AppError('An error occurred while getting the user profile', 400);
+    }
+
+    const newDataUser = {
+      ...userProfile,
+      ...user,
+      updated_at: date
+    }
+
+    const updatedUser: User = await userService.updateUser(newDataUser, userId);
+
+    res.status(200).json({ status: 'Success', data: updatedUser });
+    return;
+
+  } catch (error) {
+    if (error instanceof AppError) {
+      res.status(error.statusCode).json({ status: 'Failed', data: error.message });
+      return;
+    }
+
+    res.status(500).json({ status: 'Failed', data: 'Internal Server Error' });
+    return;
+  }
+}
+
 export const userController = {
+  getUserById,
   registerUser,
   loginUser,
-  logoutUser
+  logoutUser,
+  updateUserProfile
 }
 
 
