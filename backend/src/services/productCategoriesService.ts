@@ -5,6 +5,8 @@ import { and, eq } from "drizzle-orm";
 import type { Category, Product } from "../types/types";
 import { products } from "../database/db/productsScheme";
 import { categories } from "../database/db/categoriesScheme";
+import { productService } from "./productService";
+import { categoryService } from "./categoryService";
 
 /**
  * Retrieves all products by category from the database.
@@ -75,6 +77,59 @@ const assignCategoryToProduct = async (productId: string, categoryId: string) =>
 }
 
 /**
+ * Updates the category of a product in the database.
+ * 
+ * @param productIdOld - The ID of the product to update the category of.
+ * @param categoryIdOld - The ID of the category to update the product to.
+ * @param productIdNew - The ID of the new product to update the category to.
+ * @param categoryIdNew - The ID of the new category to update the product to.
+ * @returns A JSON response containing the status and a message.
+ */
+const updateProductCategory = async (productIdOld: string, categoryIdOld: string, productIdNew: string, categoryIdNew: string) => {
+  try {
+    const product = await productService.getProductById(productIdOld);
+    if (!product) {
+      throw new AppError('Product not found', 404);
+    }
+
+    const category = await categoryService.getCategoryById(categoryIdOld);
+    if (!category) {
+      throw new AppError('Category not found', 404);
+    }
+
+    const currentRelation = await db.select().from(productCategories).where(and(eq(productCategories.product_id, productIdOld), eq(productCategories.category_id, categoryIdOld))).get();
+
+    if (!currentRelation) {
+      throw new AppError('Product is not assigned to any category', 404);
+    }
+
+    const newProduct = await productService.getProductById(productIdNew);
+    if (!newProduct) {
+      throw new AppError('Product not found', 404);
+    }
+
+    const newCategory = await categoryService.getCategoryById(categoryIdNew);
+    if (!newCategory) {
+      throw new AppError('Category not found', 404);
+    }
+
+    const newRelation = await db.select().from(productCategories).where(and(eq(productCategories.product_id, productIdNew), eq(productCategories.category_id, categoryIdNew))).get();
+
+    if (newRelation) {
+      throw new AppError('Product is already assigned to this category', 400);
+    }
+
+    await db.delete(productCategories).where(and(eq(productCategories.product_id, productIdOld), eq(productCategories.category_id, categoryIdOld)));
+
+    await db.insert(productCategories).values({ product_id: productIdNew, category_id: categoryIdNew });
+
+  } catch (error) {
+    throw new AppError('The category could not be updated', 400);
+  }
+}
+
+
+/**
  * Unassigns a category from a product in the database.
  * 
  * @param productId - The ID of the product to unassign the category from.
@@ -93,5 +148,6 @@ export const productCategoriesService = {
   getProductsByCategory,
   getCategoriesByProduct,
   assignCategoryToProduct,
+  updateProductCategory,
   unassignCategoryFromProduct
 }
