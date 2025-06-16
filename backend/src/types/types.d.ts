@@ -12,6 +12,8 @@ import type { productCategoriesSchema, productCategoriesUpdateSchema } from '../
 import type { uuidSchema } from '../schemas/uuidSchema';
 import type { customers } from '../database/db/customersScheme';
 import type { customerSchema, customerUpdateSchema } from '../schemas/customerSchema';
+import type { shoppingCarts } from '../database/db/shoppingCartsScheme';
+import type { shoppingCartsSchema } from '../schemas/shoppingCartsSchema';
 
 
 export type UUID = `${string}-${string}-${string}-${string}-${string}`;
@@ -67,3 +69,8 @@ export type CustomerWithoutId = Omit<Customer, 'customer_id'>;
 export type CustomerInput = Input<typeof customerSchema>;
 
 export type CustomerUpdateInput = Input<typeof customerUpdateSchema>;
+
+
+export type ShoppingCart = InferModel<typeof shoppingCarts>;
+
+export type ShoppingCartInput = Input<typeof shoppingCartsSchema>;
