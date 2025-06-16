@@ -2,10 +2,10 @@ import { eq } from "drizzle-orm"
 import { db } from "../database/database"
 import { shoppingCarts } from "../database/db/shoppingCartsScheme"
 import { AppError } from "../errors"
-// import type { ShoppingCart } from "../types/types"
+import type { ShoppingCart } from "../types/types"
 
 
-const getShoppingCartByUserId = async (user_id: string) => {
+const getShoppingCartByUserId = async (user_id: string): Promise<ShoppingCart> => {
   try {
     const shoppingCart = await db.select().from(shoppingCarts).where(eq(shoppingCarts.user_id, user_id)).get();
 
